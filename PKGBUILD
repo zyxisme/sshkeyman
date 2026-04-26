@@ -1,4 +1,4 @@
-# Maintainer: zyxisme <zyxisme@users.noreply.github.com>
+# Maintainer: zyxisme <d0116u@gmail.com>
 pkgname=sshkeyman
 pkgver=0.1.0
 pkgrel=1

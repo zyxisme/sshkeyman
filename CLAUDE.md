@@ -80,3 +80,20 @@ cargo fmt --check              # check formatting
 ### Dependencies
 
 `axum` 0.8 (multipart), `tokio` 1, `askama` 0.15, `serde` 1, `serde_json` 1, `tower-http` 0.6, `ssh-key` 0.6, `dirs` 6, `tar` 0.4, `flate2` 1, `clap` 4 (derive)
+
+## Packaging & CI
+
+### GitHub Actions (`.github/workflows/release.yml`)
+
+- **On every push to main**: build + upload nightly binary artifact
+- **On tag push** (`v*`): build + package `.deb` (via `cargo-deb`) + `.rpm` (via `cargo-generate-rpm`) + upload to GitHub Release
+- Release products: `sshkeyman-x86_64-linux.tar.gz`, `.deb`, `.rpm`
+
+### PKGBUILD (AUR)
+
+Source-based Arch Linux package. `build()` runs `cargo build --release` on user machine. Installs binary to `/usr/share/sshkeyman/` with a wrapper script in `/usr/bin/sshkeyman` so `static/` directory is found at runtime.
+
+### Cargo.toml metadata
+
+- `[package.metadata.deb]` — cargo-deb config: maintainer, depends, assets
+- `[package.metadata.rpm]` — cargo-generate-rpm config: assets
