@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSHKeyman - SSH Key Manager</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="header">
+        <h1>SSHKeyman - SSH Key Manager</h1>
+        <nav>
+            <a href="/" class="nav-link active">Keys</a>
+            <a href="/config" class="nav-link">Config</a>
+            <a href="/config/raw" class="nav-link">Raw Edit</a>
+            <a href="/backup" class="nav-link">Backup All</a>
+        </nav>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <h2>SSH Keys</h2>
+            <ul class="key-list">
+                {% for key in keys %}
+                <li>
+                    <a href="/?selected={{ key.name }}"
+                       class="key-item {% if selected.as_deref() == Some(key.name.as_str()) %}active{% endif %} {% if !key.has_private %}no-private{% endif %}">
+                        {{ key.name }}
+                        {% if !key.has_private %} (no private){% endif %}
+                    </a>
+                </li>
+                {% endfor %}
+                {% if keys.is_empty() %}
+                <li class="key-item" style="color:#999;cursor:default;">No SSH keys found</li>
+                {% endif %}
+            </ul>
+        </div>
+
+        <div class="main">
+            {% match flash %}
+            {% when Some with (msg) %}
+            <div class="flash {% if flash_is_error %}flash-error{% else %}flash-success{% endif %}">{{ msg }}</div>
+            {% when None %}
+            {% endmatch %}
+
+            {% match selected_key %}
+            {% when Some with (key) %}
+            <div class="detail">
+                <h2>{{ key.name }}</h2>
+                <div class="detail-grid">
+                    <span class="label">Type:</span>
+                    <span>{{ key.key_type }}</span>
+                    <span class="label">Fingerprint:</span>
+                    <span style="font-family:monospace;font-size:13px;">{{ key.fingerprint }}</span>
+                    <span class="label">Comment:</span>
+                    <span>{{ key.comment }}</span>
+                    <span class="label">Private key:</span>
+                    <span>{% if key.has_private %}present{% else %}missing{% endif %}</span>
+                </div>
+
+                <div class="pubkey-box">{{ key.public_key_content }}</div>
+
+                {% if !host_groups.is_empty() %}
+                <div class="host-association">
+                    <span class="label">Used by hosts:</span>
+                    {% for host in host_groups %}
+                    <a href="/config" class="host-tag">{{ host }}</a>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="copyPubKey()">Copy Public Key</button>
+                    <a href="/export/{{ key.name }}" class="btn btn-secondary">Export</a>
+                    <form method="post" action="/delete" style="display:inline;"
+                          onsubmit="return confirm('Delete key \'{{ key.name }}\'? This cannot be undone.')">
+                        <input type="hidden" name="name" value="{{ key.name }}">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </div>
+            </div>
+            {% when None %}
+            <div class="empty-state">Select a key from the list</div>
+            {% endmatch %}
+
+            <div style="margin-top:32px;">
+                <h3 class="section-title">Generate New Key</h3>
+                <form method="post" action="/generate">
+                    <div class="form-grid">
+                        <label class="field-label" for="name">Key name:</label>
+                        <input type="text" id="name" name="name" placeholder="e.g. id_ed25519_github" required>
+
+                        <label class="field-label">Key type:</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="key_type" value="ed25519" checked> Ed25519</label>
+                            <label><input type="radio" name="key_type" value="rsa"> RSA-4096</label>
+                        </div>
+
+                        <label class="field-label" for="comment">Comment:</label>
+                        <input type="text" id="comment" name="comment" placeholder="user@host">
+
+                        <label class="field-label" for="passphrase">Passphrase:</label>
+                        <input type="password" id="passphrase" name="passphrase">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Generate</button>
+                    </div>
+                </form>
+            </div>
+
+            <div style="margin-top:32px;">
+                <h3 class="section-title">Import Key</h3>
+                <form method="post" action="/import" enctype="multipart/form-data" class="import-form">
+                    <input type="file" name="archive" accept=".tar.gz,.tgz" required>
+                    <button type="submit" class="btn btn-secondary">Import</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function copyPubKey() {
+            const box = document.querySelector('.pubkey-box');
+            if (box) {
+                navigator.clipboard.writeText(box.textContent.trim()).then(() => {
+                    const btn = event.target;
+                    const orig = btn.textContent;
+                    btn.textContent = 'Copied!';
+                    setTimeout(() => btn.textContent = orig, 1500);
+                });
+            }
+        }
+    </script>
+</body>
+</html>

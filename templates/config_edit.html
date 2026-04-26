@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSHKeyman - Edit Host</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="header">
+        <h1>SSHKeyman - SSH Key Manager</h1>
+        <nav>
+            <a href="/" class="nav-link">Keys</a>
+            <a href="/config" class="nav-link active">Config</a>
+            <a href="/config/raw" class="nav-link">Raw Edit</a>
+            <a href="/backup" class="nav-link">Backup All</a>
+        </nav>
+    </div>
+
+    <div class="main" style="max-width:700px;margin:0 auto;">
+        <a href="/config" style="color:#1565c0;text-decoration:none;">&larr; Back to config list</a>
+
+        <h2 style="margin:16px 0;">{% if is_new %}Add New Host{% else %}Edit Host: {{ host_pattern }}{% endif %}</h2>
+
+        <form method="post" action="/config/save">
+            <input type="hidden" name="original_host" value="{{ host_pattern }}">
+
+            <div class="form-group">
+                <label for="host_pattern" class="field-label">Host pattern:</label>
+                <input type="text" id="host_pattern" name="host_pattern" value="{{ host_pattern }}"
+                       placeholder="e.g. my-server, *.example.com, 192.168.1.*" required
+                       style="width:100%;padding:8px 12px;border:1px solid #ccc;border-radius:4px;font-size:14px;">
+            </div>
+
+            <h3 style="margin:20px 0 10px;">Fields</h3>
+            <div id="fields-container"></div>
+
+            <button type="button" class="btn btn-secondary" onclick="addField()" style="margin:10px 0;">
+                + Add Field
+            </button>
+
+            <div class="form-actions" style="margin-top:20px;">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <a href="/config" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const fields = {{ fields_json|safe }};
+        const availableKeys = {{ available_keys_json|safe }};
+        const container = document.getElementById('fields-container');
+
+        const commonFields = [
+            'HostName', 'User', 'Port', 'IdentityFile', 'ProxyJump',
+            'ProxyCommand', 'ForwardAgent', 'ServerAliveInterval',
+            'StrictHostKeyChecking', 'AddKeysToAgent', 'IdentitiesOnly',
+            'LocalForward', 'RemoteForward', 'DynamicForward',
+            'Compression', 'ConnectTimeout', 'RequestTTY'
+        ];
+
+        function addField(key, value) {
+            key = key || '';
+            value = value || '';
+            const row = document.createElement('div');
+            row.className = 'field-row';
+            row.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;align-items:center;';
+
+            const keyInput = document.createElement('input');
+            keyInput.type = 'text';
+            keyInput.name = 'field_keys';
+            keyInput.value = key;
+            keyInput.placeholder = 'Key (e.g. HostName)';
+            keyInput.setAttribute('list', 'field-keys-list');
+            keyInput.style.cssText = 'flex:1;padding:8px;border:1px solid #ccc;border-radius:4px;font-size:14px;';
+            keyInput.addEventListener('change', function() {
+                swapValueInput(row, this.value, '');
+            });
+
+            const valInput = createValueInput(key, value);
+
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.textContent = 'x';
+            removeBtn.className = 'btn btn-danger btn-sm';
+            removeBtn.onclick = () => row.remove();
+
+            row.appendChild(keyInput);
+            row.appendChild(valInput);
+            row.appendChild(removeBtn);
+            container.appendChild(row);
+        }
+
+        function createValueInput(key, value) {
+            if (key.toLowerCase() === 'identityfile' && availableKeys.length > 0) {
+                const sel = document.createElement('select');
+                sel.name = 'field_values';
+                sel.style.cssText = 'flex:2;padding:8px;border:1px solid #ccc;border-radius:4px;font-size:14px;';
+
+                const blank = document.createElement('option');
+                blank.value = '';
+                blank.textContent = '-- select a key --';
+                sel.appendChild(blank);
+
+                availableKeys.forEach(function(k) {
+                    const opt = document.createElement('option');
+                    opt.value = '~/.ssh/' + k;
+                    opt.textContent = k;
+                    if (value === opt.value || value === k) {
+                        opt.selected = true;
+                    }
+                    sel.appendChild(opt);
+                });
+
+                // Allow custom path too
+                const custom = document.createElement('option');
+                custom.value = '__custom__';
+                custom.textContent = 'Custom path...';
+                sel.appendChild(custom);
+
+                sel.addEventListener('change', function() {
+                    if (this.value === '__custom__') {
+                        const inp = document.createElement('input');
+                        inp.type = 'text';
+                        inp.name = 'field_values';
+                        inp.value = '';
+                        inp.placeholder = '~/.ssh/id_xxx';
+                        inp.style.cssText = this.style.cssText;
+                        row_ref = this.parentNode;
+                        row_ref.replaceChild(inp, this);
+                        inp.focus();
+                    }
+                });
+
+                return sel;
+            } else {
+                const inp = document.createElement('input');
+                inp.type = 'text';
+                inp.name = 'field_values';
+                inp.value = value;
+                inp.placeholder = 'Value';
+                inp.style.cssText = 'flex:2;padding:8px;border:1px solid #ccc;border-radius:4px;font-size:14px;';
+                return inp;
+            }
+        }
+
+        function swapValueInput(row, newKey, newValue) {
+            const oldVal = row.querySelector('[name="field_values"]');
+            if (!oldVal) return;
+            const newVal = createValueInput(newKey, newValue);
+            row.replaceChild(newVal, oldVal);
+        }
+
+        // Add datalist for autocomplete
+        const datalist = document.createElement('datalist');
+        datalist.id = 'field-keys-list';
+        commonFields.forEach(f => {
+            const opt = document.createElement('option');
+            opt.value = f;
+            datalist.appendChild(opt);
+        });
+        document.body.appendChild(datalist);
+
+        // Load existing fields
+        fields.forEach(f => addField(f[0], f[1]));
+
+        // If no fields, add a blank one
+        if (fields.length === 0) {
+            addField('HostName', '');
+            addField('User', '');
+        }
+    </script>
+</body>
+</html>

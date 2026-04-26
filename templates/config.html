@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSHKeyman - SSH Config</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="header">
+        <h1>SSHKeyman - SSH Key Manager</h1>
+        <nav>
+            <a href="/" class="nav-link">Keys</a>
+            <a href="/config" class="nav-link active">Config</a>
+            <a href="/config/raw" class="nav-link">Raw Edit</a>
+            <a href="/backup" class="nav-link">Backup All</a>
+        </nav>
+    </div>
+
+    <div class="main" style="max-width:900px;margin:0 auto;">
+        {% match flash %}
+        {% when Some with (msg) %}
+        <div class="flash {% if flash_is_error %}flash-error{% else %}flash-success{% endif %}">{{ msg }}</div>
+        {% when None %}
+        {% endmatch %}
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+            <h2 style="margin:0;">SSH Config Hosts</h2>
+            <form method="post" action="/config/add" style="display:inline;">
+                <button type="submit" class="btn btn-primary">+ Add New Host</button>
+            </form>
+        </div>
+
+        {% for entry in entries %}
+        <div class="config-card">
+            <div class="config-card-header">
+                <div>
+                    <span class="config-host">{{ entry.host_pattern }}</span>
+                    {% match entry.identity_file %}
+                    {% when Some with (idf) %}
+                    <span class="host-tag" style="margin-left:8px;font-size:12px;">Key: {{ idf }}</span>
+                    {% when None %}
+                    {% endmatch %}
+                </div>
+                <div class="config-card-actions">
+                    <a href="/config/edit?host={{ entry.host_pattern }}" class="btn btn-secondary btn-sm">Edit</a>
+                    <form method="post" action="/config/delete" style="display:inline;"
+                          onsubmit="return confirm('Delete host \'{{ entry.host_pattern }}\'?')">
+                        <input type="hidden" name="host" value="{{ entry.host_pattern }}">
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                </div>
+            </div>
+            <div class="config-card-body">
+                <div class="config-fields">
+                    {% for (key, value) in entry.fields %}
+                    <div class="config-field">
+                        <span class="config-field-key">{{ key }}</span>
+                        <span class="config-field-value">{{ value }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        {% if entries.is_empty() %}
+        <div class="empty-state">No SSH config entries found. Add one to get started.</div>
+        {% endif %}
+
+        <div style="margin-top:32px;">
+            <h3 class="section-title">Restore from Backup</h3>
+            <form method="post" action="/restore" enctype="multipart/form-data" class="import-form">
+                <input type="file" name="archive" accept=".tar.gz,.tgz" required>
+                <button type="submit" class="btn btn-secondary">Restore</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
