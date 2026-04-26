@@ -21,11 +21,10 @@ jobs:
       - name: Build
         run: cargo build --release
 
-      - name: Upload binary
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Upload nightly binary
         uses: actions/upload-artifact@v4
         with:
-          name: sshkeyman-x86_64-linux
+          name: sshkeyman-nightly-x86_64-linux
           path: target/release/sshkeyman
 
   release:
