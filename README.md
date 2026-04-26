@@ -1,5 +1,5 @@
 # SSHKeyman
-
+[![Release](https://github.com/zyxisme/sshkeyman/actions/workflows/release.yml/badge.svg)](https://github.com/zyxisme/sshkeyman/actions/workflows/release.yml)
 [English](#english) | [中文](#中文)
 
 ---
