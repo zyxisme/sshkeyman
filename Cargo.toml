@@ -9,7 +9,7 @@ license = "MIT"
 repository = "https://github.com/zyxisme/sshkeyman"
 keywords = ["sshkey","ssh"]
 categories = ["development-tools"]
-
+documentation = "https://docs.rs/sshkeyman"
 
 [dependencies]
 axum = { version = "0.8", features = ["multipart"] }
