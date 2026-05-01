@@ -91,7 +91,19 @@ cargo fmt --check              # check formatting
 
 ### PKGBUILD (AUR)
 
-Source-based Arch Linux package. `build()` runs `cargo build --release` on user machine. Installs binary to `/usr/share/sshkeyman/` with a wrapper script in `/usr/bin/sshkeyman` so `static/` directory is found at runtime.
+VCS-based (`git+https://`) Arch Linux package. `build()` runs `cargo build --release` on user machine. Installs binary to `/usr/share/sshkeyman/` with a wrapper script in `/usr/bin/sshkeyman` that `cd`s before exec so `static/` is found at runtime. `pkgver()` auto-generated via `git describe`.
+
+**AUR repo**: `/home/zyx/projs/aur-sshkeyman/` (separate from project repo, remote `ssh://aur@aur.archlinux.org/sshkeyman.git`, SSH key `~/.ssh/aur`)
+
+**Update flow**:
+```bash
+cp PKGBUILD /home/zyx/projs/aur-sshkeyman/PKGBUILD
+cd /home/zyx/projs/aur-sshkeyman
+makepkg --printsrcinfo > .SRCINFO
+git add PKGBUILD .SRCINFO
+git commit -m "<message>"
+git push origin master
+```
 
 ### Cargo.toml metadata
 
