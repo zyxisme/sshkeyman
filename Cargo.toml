@@ -1,7 +1,15 @@
 [package]
 name = "sshkeyman"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
+authors = ["zyxisme <d0116u@gmail.com>"]
+description = "Web-based SSH key & config manager in Rust. "
+readme = "README.md"
+license = "MIT"
+repository = "https://github.com/zyxisme/sshkeyman"
+keywords = ["sshkey","ssh"]
+categories = ["development-tools"]
+
 
 [dependencies]
 axum = { version = "0.8", features = ["multipart"] }
@@ -15,16 +23,5 @@ tar = "0.4"
 flate2 = "1"
 clap = { version = "4", features = ["derive"] }
 serde_json = "1"
-
-[package.metadata.deb]
-maintainer = "zyxisme"
-depends = "libc6"
-section = "utils"
-assets = [
-    ["target/release/sshkeyman", "usr/bin/sshkeyman", "755"],
-]
-
-[package.metadata.rpm]
-assets = [
-    { source = "target/release/sshkeyman", dest = "/usr/bin/sshkeyman", mode = "755" },
-]
+toml = "0.8"
+unic-langid = { version = "0.9", features = ["macros"] }

@@ -1,24 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ t["lang"] }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SSHKeyman - Raw Config Editor</title>
+    <title>{{ t["raw_title"] }}</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <div class="header">
-        <h1>SSHKeyman - SSH Key Manager</h1>
+        <h1>{{ t["nav_title"] }}</h1>
         <nav>
-            <a href="/" class="nav-link">Keys</a>
-            <a href="/config" class="nav-link">Config</a>
-            <a href="/config/raw" class="nav-link active">Raw Edit</a>
-            <a href="/backup" class="nav-link">Backup All</a>
+            <a href="/" class="nav-link">{{ t["nav_keys"] }}</a>
+            <a href="/config" class="nav-link">{{ t["nav_config"] }}</a>
+            <a href="/config/raw" class="nav-link active">{{ t["nav_raw_edit"] }}</a>
+            <a href="/backup" class="nav-link">{{ t["nav_backup_all"] }}</a>
         </nav>
     </div>
 
     <div class="main" style="max-width:900px;margin:0 auto;">
-        <a href="/config" style="color:#1565c0;text-decoration:none;">&larr; Back to config list</a>
+        <a href="/config" style="color:#1565c0;text-decoration:none;">{{ t["raw_back"] }}</a>
 
         {% match flash %}
         {% when Some with (msg) %}
@@ -26,14 +26,14 @@
         {% when None %}
         {% endmatch %}
 
-        <h2 style="margin:16px 0;">Raw SSH Config Editor</h2>
-        <p style="color:#666;margin-bottom:12px;">Edit the raw ~/.ssh/config file directly. Be careful with syntax.</p>
+        <h2 style="margin:16px 0;">{{ t["raw_heading"] }}</h2>
+        <p style="color:#666;margin-bottom:12px;">{{ t["raw_warning"] }}</p>
 
         <form method="post" action="/config/raw/save">
             <textarea name="content" style="width:100%;height:500px;font-family:monospace;font-size:13px;padding:12px;border:1px solid #ccc;border-radius:4px;tab-size:4;white-space:pre;resize:vertical;">{{ content }}</textarea>
             <div class="form-actions" style="margin-top:12px;">
-                <button type="submit" class="btn btn-primary">Save</button>
-                <a href="/config" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">{{ t["raw_save"] }}</button>
+                <a href="/config" class="btn btn-secondary">{{ t["raw_cancel"] }}</a>
             </div>
         </form>
     </div>

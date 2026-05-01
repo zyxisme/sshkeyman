@@ -1,6 +1,6 @@
 use axum::body::Body;
 use axum::extract::Multipart;
-use axum::http::{header, StatusCode};
+use axum::http::{StatusCode, header};
 use axum::response::{IntoResponse, Redirect, Response};
 
 use crate::export;
@@ -11,11 +11,7 @@ pub async fn export(axum::extract::Path(name): axum::extract::Path<String>) -> R
     let key = match keys.iter().find(|k| k.name == name) {
         Some(k) => k.clone(),
         None => {
-            return (
-                StatusCode::NOT_FOUND,
-                "key not found".to_string(),
-            )
-                .into_response();
+            return (StatusCode::NOT_FOUND, "key not found".to_string()).into_response();
         }
     };
 
@@ -62,7 +58,7 @@ pub async fn import(mut multipart: Multipart) -> Redirect {
             Ok(d) => d,
             Err(e) => {
                 return Redirect::to(&format!(
-                    "/?flash_error=upload+failed:+{}",
+                    "/?flash_error=flash_upload_failed&flash_param={}",
                     e.to_string().replace(' ', "+")
                 ));
             }
@@ -72,7 +68,7 @@ pub async fn import(mut multipart: Multipart) -> Redirect {
         let tmp_path = tmp_dir.join("sshkeyman_import.tar.gz");
         if let Err(e) = std::fs::write(&tmp_path, &data) {
             return Redirect::to(&format!(
-                "/?flash_error=write+failed:+{}",
+                "/?flash_error=flash_write_failed&flash_param={}",
                 e.to_string().replace(' ', "+")
             ));
         }
@@ -81,13 +77,13 @@ pub async fn import(mut multipart: Multipart) -> Redirect {
         let _ = std::fs::remove_file(&tmp_path);
 
         return match result {
-            Ok(name) => Redirect::to(&format!("/?selected={}&flash=imported+key+'{}'", name, name)),
-            Err(e) => Redirect::to(&format!(
-                "/?flash_error={}",
-                e.replace(' ', "+")
+            Ok(name) => Redirect::to(&format!(
+                "/?selected={}&flash=flash_imported_key&flash_param={}",
+                name, name
             )),
+            Err(e) => Redirect::to(&format!("/?flash_error={}", e.replace(' ', "+"))),
         };
     }
 
-    Redirect::to("/?flash_error=no+file+uploaded")
+    Redirect::to("/?flash_error=flash_no_file_uploaded")
 }

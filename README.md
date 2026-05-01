@@ -1,58 +1,6 @@
 # SSHKeyman
 [![Release](https://github.com/zyxisme/sshkeyman/actions/workflows/release.yml/badge.svg)](https://github.com/zyxisme/sshkeyman/actions/workflows/release.yml)
-[English](#english) | [中文](#中文)
-
----
-
-## English
-
-A web-based SSH key and config manager, built with Rust + Axum + Askama.
-
-### Features
-
-- **Key Management** — List, generate (Ed25519 / RSA-4096), delete SSH keys
-- **Copy & Export** — One-click copy public key to clipboard, export/import key pairs as `.tar.gz`
-- **Config Management** — View, edit, delete `~/.ssh/config` Host blocks via form UI
-- **Key-Config Association** — See which Hosts reference a given key
-- **Raw Editor** — Directly edit the raw config file text
-- **Full Backup** — Backup and restore entire `~/.ssh/` (keys + config) as `.tar.gz`
-- **CLI Options** — Customizable listen address via `--host`, `--port`, `--bind`
-
-### Quick Start
-
-```bash
-cargo run
-```
-
-Open http://127.0.0.1:3000 in your browser.
-
-### CLI Usage
-
-```bash
-sshkeyman                        # default: 127.0.0.1:3000
-sshkeyman --port 8080            # custom port
-sshkeyman --host 0.0.0.0         # listen on all interfaces
-sshkeyman --bind 0.0.0.0:9000    # full bind address
-```
-
-### Build
-
-```bash
-cargo build --release
-# binary at target/release/sshkeyman
-```
-
-### Tech Stack
-
-- **Backend**: Axum + Tokio
-- **Templates**: Askama (server-side rendered)
-- **SSH Parsing**: `ssh-key` crate, `ssh-keygen` subprocess
-- **Archive**: `tar` + `flate2`
-- **CLI**: `clap`
-
-### License
-
-MIT
+[中文](#中文) | [English](#english)
 
 ---
 
@@ -103,5 +51,57 @@ cargo build --release
 - **命令行**: `clap`
 
 ### 许可证
+
+MIT
+
+---
+
+## English
+
+A web-based SSH key and config manager, built with Rust + Axum + Askama.
+
+### Features
+
+- **Key Management** — List, generate (Ed25519 / RSA-4096), delete SSH keys
+- **Copy & Export** — One-click copy public key to clipboard, export/import key pairs as `.tar.gz`
+- **Config Management** — View, edit, delete `~/.ssh/config` Host blocks via form UI
+- **Key-Config Association** — See which Hosts reference a given key
+- **Raw Editor** — Directly edit the raw config file text
+- **Full Backup** — Backup and restore entire `~/.ssh/` (keys + config) as `.tar.gz`
+- **CLI Options** — Customizable listen address via `--host`, `--port`, `--bind`
+
+### Quick Start
+
+```bash
+cargo run
+```
+
+Open http://127.0.0.1:3000 in your browser.
+
+### CLI Usage
+
+```bash
+sshkeyman                        # default: 127.0.0.1:3000
+sshkeyman --port 8080            # custom port
+sshkeyman --host 0.0.0.0         # listen on all interfaces
+sshkeyman --bind 0.0.0.0:9000    # full bind address
+```
+
+### Build
+
+```bash
+cargo build --release
+# binary at target/release/sshkeyman
+```
+
+### Tech Stack
+
+- **Backend**: Axum + Tokio
+- **Templates**: Askama (server-side rendered)
+- **SSH Parsing**: `ssh-key` crate, `ssh-keygen` subprocess
+- **Archive**: `tar` + `flate2`
+- **CLI**: `clap`
+
+### License
 
 MIT

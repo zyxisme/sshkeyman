@@ -1,5 +1,6 @@
 mod config;
 mod export;
+mod i18n;
 mod routes;
 mod ssh;
 
@@ -24,6 +25,8 @@ struct Args {
 #[tokio::main]
 async fn main() {
     let args = Args::parse();
+
+    i18n::init();
 
     let addr = args
         .bind

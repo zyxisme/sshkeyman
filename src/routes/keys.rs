@@ -33,10 +33,10 @@ pub async fn delete(Form(form): Form<DeleteForm>) -> Redirect {
     let keys = ssh::list_keys();
     if let Some(key) = keys.iter().find(|k| k.name == form.name) {
         match ssh::delete_key(key) {
-            Ok(()) => Redirect::to("/?flash=deleted"),
+            Ok(()) => Redirect::to("/?flash=flash_deleted"),
             Err(e) => Redirect::to(&format!("/?flash_error={}", e.replace(' ', "+"))),
         }
     } else {
-        Redirect::to("/?flash_error=key+not+found")
+        Redirect::to("/?flash_error=flash_key_not_found")
     }
 }

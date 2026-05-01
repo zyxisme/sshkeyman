@@ -1,52 +1,53 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ t["lang"] }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SSHKeyman - Edit Host</title>
+    <title>{{ t["edit_title"] }}</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <div class="header">
-        <h1>SSHKeyman - SSH Key Manager</h1>
+        <h1>{{ t["nav_title"] }}</h1>
         <nav>
-            <a href="/" class="nav-link">Keys</a>
-            <a href="/config" class="nav-link active">Config</a>
-            <a href="/config/raw" class="nav-link">Raw Edit</a>
-            <a href="/backup" class="nav-link">Backup All</a>
+            <a href="/" class="nav-link">{{ t["nav_keys"] }}</a>
+            <a href="/config" class="nav-link active">{{ t["nav_config"] }}</a>
+            <a href="/config/raw" class="nav-link">{{ t["nav_raw_edit"] }}</a>
+            <a href="/backup" class="nav-link">{{ t["nav_backup_all"] }}</a>
         </nav>
     </div>
 
     <div class="main" style="max-width:700px;margin:0 auto;">
-        <a href="/config" style="color:#1565c0;text-decoration:none;">&larr; Back to config list</a>
+        <a href="/config" style="color:#1565c0;text-decoration:none;">{{ t["edit_back"] }}</a>
 
-        <h2 style="margin:16px 0;">{% if is_new %}Add New Host{% else %}Edit Host: {{ host_pattern }}{% endif %}</h2>
+        <h2 style="margin:16px 0;">{% if is_new %}{{ t["edit_add_title"] }}{% else %}{{ t["edit_edit_title_prefix"] }}{{ host_pattern }}{% endif %}</h2>
 
         <form method="post" action="/config/save">
             <input type="hidden" name="original_host" value="{{ host_pattern }}">
 
             <div class="form-group">
-                <label for="host_pattern" class="field-label">Host pattern:</label>
+                <label for="host_pattern" class="field-label">{{ t["edit_host_pattern_label"] }}</label>
                 <input type="text" id="host_pattern" name="host_pattern" value="{{ host_pattern }}"
-                       placeholder="e.g. my-server, *.example.com, 192.168.1.*" required
+                       placeholder="{{ t["edit_host_pattern_placeholder"] }}" required
                        style="width:100%;padding:8px 12px;border:1px solid #ccc;border-radius:4px;font-size:14px;">
             </div>
 
-            <h3 style="margin:20px 0 10px;">Fields</h3>
+            <h3 style="margin:20px 0 10px;">{{ t["edit_fields_heading"] }}</h3>
             <div id="fields-container"></div>
 
             <button type="button" class="btn btn-secondary" onclick="addField()" style="margin:10px 0;">
-                + Add Field
+                {{ t["edit_add_field"] }}
             </button>
 
             <div class="form-actions" style="margin-top:20px;">
-                <button type="submit" class="btn btn-primary">Save</button>
-                <a href="/config" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">{{ t["edit_save"] }}</button>
+                <a href="/config" class="btn btn-secondary">{{ t["edit_cancel"] }}</a>
             </div>
         </form>
     </div>
 
     <script>
+        const L = {{ js_locale_json|safe }};
         const fields = {{ fields_json|safe }};
         const availableKeys = {{ available_keys_json|safe }};
         const container = document.getElementById('fields-container');
@@ -70,7 +71,7 @@
             keyInput.type = 'text';
             keyInput.name = 'field_keys';
             keyInput.value = key;
-            keyInput.placeholder = 'Key (e.g. HostName)';
+            keyInput.placeholder = L.key_placeholder;
             keyInput.setAttribute('list', 'field-keys-list');
             keyInput.style.cssText = 'flex:1;padding:8px;border:1px solid #ccc;border-radius:4px;font-size:14px;';
             keyInput.addEventListener('change', function() {
@@ -81,7 +82,7 @@
 
             const removeBtn = document.createElement('button');
             removeBtn.type = 'button';
-            removeBtn.textContent = 'x';
+            removeBtn.textContent = L.remove;
             removeBtn.className = 'btn btn-danger btn-sm';
             removeBtn.onclick = () => row.remove();
 
@@ -99,7 +100,7 @@
 
                 const blank = document.createElement('option');
                 blank.value = '';
-                blank.textContent = '-- select a key --';
+                blank.textContent = L.select_key;
                 sel.appendChild(blank);
 
                 availableKeys.forEach(function(k) {
@@ -115,7 +116,7 @@
                 // Allow custom path too
                 const custom = document.createElement('option');
                 custom.value = '__custom__';
-                custom.textContent = 'Custom path...';
+                custom.textContent = L.custom_path;
                 sel.appendChild(custom);
 
                 sel.addEventListener('change', function() {
@@ -138,7 +139,7 @@
                 inp.type = 'text';
                 inp.name = 'field_values';
                 inp.value = value;
-                inp.placeholder = 'Value';
+                inp.placeholder = L.value_placeholder;
                 inp.style.cssText = 'flex:2;padding:8px;border:1px solid #ccc;border-radius:4px;font-size:14px;';
                 return inp;
             }

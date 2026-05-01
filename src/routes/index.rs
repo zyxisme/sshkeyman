@@ -1,9 +1,11 @@
 use askama::Template;
 use axum::extract::Query;
+use axum::http::HeaderMap;
 use axum::response::Html;
 use serde::Deserialize;
 
 use crate::config;
+use crate::i18n::{Locale, LocaleMap};
 use crate::ssh::{self, SshKeyInfo};
 
 #[derive(Template)]
@@ -15,6 +17,7 @@ pub struct IndexTemplate {
     pub host_groups: Vec<String>,
     pub flash: Option<String>,
     pub flash_is_error: bool,
+    pub t: &'static LocaleMap,
 }
 
 #[derive(Deserialize)]
@@ -22,9 +25,13 @@ pub struct IndexQuery {
     pub selected: Option<String>,
     pub flash: Option<String>,
     pub flash_error: Option<String>,
+    pub flash_param: Option<String>,
 }
 
-pub async fn index(Query(query): Query<IndexQuery>) -> Html<String> {
+pub async fn index(Query(query): Query<IndexQuery>, headers: HeaderMap) -> Html<String> {
+    let locale =
+        Locale::from_accept_language(headers.get("accept-language").and_then(|v| v.to_str().ok()));
+
     let keys = ssh::list_keys();
     let selected_key = query
         .selected
@@ -38,9 +45,15 @@ pub async fn index(Query(query): Query<IndexQuery>) -> Html<String> {
     };
 
     let (flash, flash_is_error) = if let Some(msg) = query.flash_error {
-        (Some(msg), true)
+        (
+            Some(locale.resolve_flash(&msg, query.flash_param.as_deref())),
+            true,
+        )
     } else if let Some(msg) = query.flash {
-        (Some(msg), false)
+        (
+            Some(locale.resolve_flash(&msg, query.flash_param.as_deref())),
+            false,
+        )
     } else {
         (None, false)
     };
@@ -52,7 +65,11 @@ pub async fn index(Query(query): Query<IndexQuery>) -> Html<String> {
         host_groups,
         flash,
         flash_is_error,
+        t: locale.map,
     };
 
-    Html(tmpl.render().unwrap_or_else(|e| format!("Template error: {}", e)))
+    Html(
+        tmpl.render()
+            .unwrap_or_else(|e| format!("Template error: {}", e)),
+    )
 }

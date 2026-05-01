@@ -1,37 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ t["lang"] }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SSHKeyman - SSH Key Manager</title>
+    <title>{{ t["nav_title"] }}</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <div class="header">
-        <h1>SSHKeyman - SSH Key Manager</h1>
+        <h1>{{ t["nav_title"] }}</h1>
         <nav>
-            <a href="/" class="nav-link active">Keys</a>
-            <a href="/config" class="nav-link">Config</a>
-            <a href="/config/raw" class="nav-link">Raw Edit</a>
-            <a href="/backup" class="nav-link">Backup All</a>
+            <a href="/" class="nav-link active">{{ t["nav_keys"] }}</a>
+            <a href="/config" class="nav-link">{{ t["nav_config"] }}</a>
+            <a href="/config/raw" class="nav-link">{{ t["nav_raw_edit"] }}</a>
+            <a href="/backup" class="nav-link">{{ t["nav_backup_all"] }}</a>
         </nav>
     </div>
 
     <div class="container">
         <div class="sidebar">
-            <h2>SSH Keys</h2>
+            <h2>{{ t["index_heading"] }}</h2>
             <ul class="key-list">
                 {% for key in keys %}
                 <li>
                     <a href="/?selected={{ key.name }}"
                        class="key-item {% if selected.as_deref() == Some(key.name.as_str()) %}active{% endif %} {% if !key.has_private %}no-private{% endif %}">
                         {{ key.name }}
-                        {% if !key.has_private %} (no private){% endif %}
+                        {% if !key.has_private %} {{ t["index_no_private"] }}{% endif %}
                     </a>
                 </li>
                 {% endfor %}
                 {% if keys.is_empty() %}
-                <li class="key-item" style="color:#999;cursor:default;">No SSH keys found</li>
+                <li class="key-item" style="color:#999;cursor:default;">{{ t["index_no_keys"] }}</li>
                 {% endif %}
             </ul>
         </div>
@@ -48,21 +48,21 @@
             <div class="detail">
                 <h2>{{ key.name }}</h2>
                 <div class="detail-grid">
-                    <span class="label">Type:</span>
+                    <span class="label">{{ t["index_type_label"] }}</span>
                     <span>{{ key.key_type }}</span>
-                    <span class="label">Fingerprint:</span>
+                    <span class="label">{{ t["index_fingerprint_label"] }}</span>
                     <span style="font-family:monospace;font-size:13px;">{{ key.fingerprint }}</span>
-                    <span class="label">Comment:</span>
+                    <span class="label">{{ t["index_comment_label"] }}</span>
                     <span>{{ key.comment }}</span>
-                    <span class="label">Private key:</span>
-                    <span>{% if key.has_private %}present{% else %}missing{% endif %}</span>
+                    <span class="label">{{ t["index_private_key_label"] }}</span>
+                    <span>{% if key.has_private %}{{ t["index_present"] }}{% else %}{{ t["index_missing"] }}{% endif %}</span>
                 </div>
 
                 <div class="pubkey-box">{{ key.public_key_content }}</div>
 
                 {% if !host_groups.is_empty() %}
                 <div class="host-association">
-                    <span class="label">Used by hosts:</span>
+                    <span class="label">{{ t["index_used_by_hosts"] }}</span>
                     {% for host in host_groups %}
                     <a href="/config" class="host-tag">{{ host }}</a>
                     {% endfor %}
@@ -70,49 +70,49 @@
                 {% endif %}
 
                 <div class="actions">
-                    <button class="btn btn-primary" onclick="copyPubKey()">Copy Public Key</button>
-                    <a href="/export/{{ key.name }}" class="btn btn-secondary">Export</a>
+                    <button class="btn btn-primary" onclick="copyPubKey()">{{ t["index_copy_pubkey"] }}</button>
+                    <a href="/export/{{ key.name }}" class="btn btn-secondary">{{ t["index_export"] }}</a>
                     <form method="post" action="/delete" style="display:inline;"
-                          onsubmit="return confirm('Delete key \'{{ key.name }}\'? This cannot be undone.')">
+                          onsubmit="return confirm('{{ t["index_delete_confirm"] }}'.replace('{0}', '{{ key.name }}'))">
                         <input type="hidden" name="name" value="{{ key.name }}">
-                        <button type="submit" class="btn btn-danger">Delete</button>
+                        <button type="submit" class="btn btn-danger">{{ t["index_delete"] }}</button>
                     </form>
                 </div>
             </div>
             {% when None %}
-            <div class="empty-state">Select a key from the list</div>
+            <div class="empty-state">{{ t["index_select_key"] }}</div>
             {% endmatch %}
 
             <div style="margin-top:32px;">
-                <h3 class="section-title">Generate New Key</h3>
+                <h3 class="section-title">{{ t["index_generate_heading"] }}</h3>
                 <form method="post" action="/generate">
                     <div class="form-grid">
-                        <label class="field-label" for="name">Key name:</label>
-                        <input type="text" id="name" name="name" placeholder="e.g. id_ed25519_github" required>
+                        <label class="field-label" for="name">{{ t["index_key_name_label"] }}</label>
+                        <input type="text" id="name" name="name" placeholder="{{ t["index_key_name_placeholder"] }}" required>
 
-                        <label class="field-label">Key type:</label>
+                        <label class="field-label">{{ t["index_key_type_label"] }}</label>
                         <div class="radio-group">
-                            <label><input type="radio" name="key_type" value="ed25519" checked> Ed25519</label>
-                            <label><input type="radio" name="key_type" value="rsa"> RSA-4096</label>
+                            <label><input type="radio" name="key_type" value="ed25519" checked> {{ t["index_ed25519"] }}</label>
+                            <label><input type="radio" name="key_type" value="rsa"> {{ t["index_rsa4096"] }}</label>
                         </div>
 
-                        <label class="field-label" for="comment">Comment:</label>
-                        <input type="text" id="comment" name="comment" placeholder="user@host">
+                        <label class="field-label" for="comment">{{ t["index_comment_label"] }}</label>
+                        <input type="text" id="comment" name="comment" placeholder="{{ t["index_comment_placeholder"] }}">
 
-                        <label class="field-label" for="passphrase">Passphrase:</label>
+                        <label class="field-label" for="passphrase">{{ t["index_passphrase_label"] }}</label>
                         <input type="password" id="passphrase" name="passphrase">
                     </div>
                     <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">Generate</button>
+                        <button type="submit" class="btn btn-primary">{{ t["index_generate"] }}</button>
                     </div>
                 </form>
             </div>
 
             <div style="margin-top:32px;">
-                <h3 class="section-title">Import Key</h3>
+                <h3 class="section-title">{{ t["index_import_heading"] }}</h3>
                 <form method="post" action="/import" enctype="multipart/form-data" class="import-form">
                     <input type="file" name="archive" accept=".tar.gz,.tgz" required>
-                    <button type="submit" class="btn btn-secondary">Import</button>
+                    <button type="submit" class="btn btn-secondary">{{ t["index_import"] }}</button>
                 </form>
             </div>
         </div>
@@ -125,7 +125,7 @@
                 navigator.clipboard.writeText(box.textContent.trim()).then(() => {
                     const btn = event.target;
                     const orig = btn.textContent;
-                    btn.textContent = 'Copied!';
+                    btn.textContent = '{{ t["index_copied"] }}';
                     setTimeout(() => btn.textContent = orig, 1500);
                 });
             }

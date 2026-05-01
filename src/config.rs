@@ -153,8 +153,7 @@ pub fn find_hosts_using_key(key_name: &str) -> Vec<String> {
         .iter()
         .filter(|e| {
             e.fields.iter().any(|(k, v)| {
-                k == "IdentityFile"
-                    && (v == &full_path || v == &full_path_tilde || v == key_name)
+                k == "IdentityFile" && (v == &full_path || v == &full_path_tilde || v == key_name)
             })
         })
         .map(|e| e.host_pattern.clone())

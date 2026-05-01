@@ -1,14 +1,13 @@
+use flate2::Compression;
 use flate2::read::GzDecoder;
 use flate2::write::GzEncoder;
-use flate2::Compression;
 use std::fs::File;
 use std::path::Path;
 
 use crate::ssh::{self, SshKeyInfo};
 
 pub fn export_key(key: &SshKeyInfo, dest_path: &Path) -> Result<(), String> {
-    let tar_gz = File::create(dest_path)
-        .map_err(|e| format!("failed to create file: {}", e))?;
+    let tar_gz = File::create(dest_path).map_err(|e| format!("failed to create file: {}", e))?;
     let enc = GzEncoder::new(tar_gz, Compression::default());
     let mut tar = tar::Builder::new(enc);
 
@@ -31,8 +30,7 @@ pub fn export_key(key: &SshKeyInfo, dest_path: &Path) -> Result<(), String> {
 }
 
 pub fn import_key(archive_path: &Path) -> Result<String, String> {
-    let file =
-        File::open(archive_path).map_err(|e| format!("failed to open archive: {}", e))?;
+    let file = File::open(archive_path).map_err(|e| format!("failed to open archive: {}", e))?;
     let dec = GzDecoder::new(file);
     let mut archive = tar::Archive::new(dec);
 
@@ -47,9 +45,7 @@ pub fn import_key(archive_path: &Path) -> Result<String, String> {
 
     // Safety check: refuse if target files already exist
     for entry in &entries {
-        let entry_path = entry
-            .path()
-            .map_err(|e| format!("bad entry path: {}", e))?;
+        let entry_path = entry.path().map_err(|e| format!("bad entry path: {}", e))?;
         let file_name = entry_path
             .file_name()
             .ok_or("entry has no filename")?
@@ -65,8 +61,7 @@ pub fn import_key(archive_path: &Path) -> Result<String, String> {
     }
 
     // Extract
-    let file =
-        File::open(archive_path).map_err(|e| format!("failed to reopen archive: {}", e))?;
+    let file = File::open(archive_path).map_err(|e| format!("failed to reopen archive: {}", e))?;
     let dec = GzDecoder::new(file);
     let mut archive = tar::Archive::new(dec);
 
@@ -85,13 +80,12 @@ pub fn import_key(archive_path: &Path) -> Result<String, String> {
 pub fn backup_all(dest_path: &Path) -> Result<(), String> {
     let ssh_dir = ssh::ssh_dir();
 
-    let tar_gz =
-        File::create(dest_path).map_err(|e| format!("failed to create file: {}", e))?;
+    let tar_gz = File::create(dest_path).map_err(|e| format!("failed to create file: {}", e))?;
     let enc = GzEncoder::new(tar_gz, Compression::default());
     let mut tar = tar::Builder::new(enc);
 
-    let entries = std::fs::read_dir(&ssh_dir)
-        .map_err(|e| format!("failed to read ~/.ssh: {}", e))?;
+    let entries =
+        std::fs::read_dir(&ssh_dir).map_err(|e| format!("failed to read ~/.ssh: {}", e))?;
 
     for entry in entries.flatten() {
         let path = entry.path();
@@ -101,8 +95,8 @@ pub fn backup_all(dest_path: &Path) -> Result<(), String> {
         // Include: config, *.pub, and private key files (files without extension that have a .pub counterpart)
         let is_pub = file_name.ends_with(".pub");
         let is_config = file_name == "config";
-        let is_private_key = !file_name.contains('.')
-            && ssh_dir.join(format!("{}.pub", file_name)).exists();
+        let is_private_key =
+            !file_name.contains('.') && ssh_dir.join(format!("{}.pub", file_name)).exists();
 
         if is_pub || is_config || is_private_key {
             tar.append_path_with_name(&path, &file_name)
@@ -118,8 +112,7 @@ pub fn backup_all(dest_path: &Path) -> Result<(), String> {
 /// Restore all files from a backup tar.gz into ~/.ssh
 /// Skips files that already exist
 pub fn restore_all(archive_path: &Path) -> Result<Vec<String>, String> {
-    let file =
-        File::open(archive_path).map_err(|e| format!("failed to open archive: {}", e))?;
+    let file = File::open(archive_path).map_err(|e| format!("failed to open archive: {}", e))?;
     let dec = GzDecoder::new(file);
     let mut archive = tar::Archive::new(dec);
 
@@ -134,9 +127,7 @@ pub fn restore_all(archive_path: &Path) -> Result<Vec<String>, String> {
 
     // First pass: safety check
     for entry in &entries {
-        let entry_path = entry
-            .path()
-            .map_err(|e| format!("bad entry path: {}", e))?;
+        let entry_path = entry.path().map_err(|e| format!("bad entry path: {}", e))?;
         let file_name = entry_path
             .file_name()
             .ok_or("entry has no filename")?
@@ -152,8 +143,7 @@ pub fn restore_all(archive_path: &Path) -> Result<Vec<String>, String> {
     }
 
     // Second pass: extract
-    let file =
-        File::open(archive_path).map_err(|e| format!("failed to reopen archive: {}", e))?;
+    let file = File::open(archive_path).map_err(|e| format!("failed to reopen archive: {}", e))?;
     let dec = GzDecoder::new(file);
     let mut archive = tar::Archive::new(dec);
 
@@ -163,9 +153,7 @@ pub fn restore_all(archive_path: &Path) -> Result<Vec<String>, String> {
 
     // Set permissions on private keys and collect restored names
     for entry in &entries {
-        let entry_path = entry
-            .path()
-            .map_err(|e| format!("bad entry path: {}", e))?;
+        let entry_path = entry.path().map_err(|e| format!("bad entry path: {}", e))?;
         let file_name = entry_path
             .file_name()
             .ok_or("entry has no filename")?

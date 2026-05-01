@@ -20,7 +20,10 @@ pub fn router() -> Router {
         .route("/config/add", axum::routing::post(config::config_add))
         .route("/config/delete", axum::routing::post(config::config_delete))
         .route("/config/raw", axum::routing::get(config::config_raw))
-        .route("/config/raw/save", axum::routing::post(config::config_raw_save))
+        .route(
+            "/config/raw/save",
+            axum::routing::post(config::config_raw_save),
+        )
         // Backup & restore
         .route("/backup", axum::routing::get(config::backup))
         .route("/restore", axum::routing::post(config::restore))
