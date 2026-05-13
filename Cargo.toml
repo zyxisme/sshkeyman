@@ -1,6 +1,6 @@
 [package]
 name = "sshkeyman"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 authors = ["zyxisme <d0116u@gmail.com>"]
 description = "Web-based SSH key & config manager in Rust. "
