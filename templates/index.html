@@ -72,6 +72,7 @@
                 <div class="actions">
                     <button class="btn btn-primary" onclick="copyPubKey()">{{ t["index_copy_pubkey"] }}</button>
                     <a href="/export/{{ key.name }}" class="btn btn-secondary">{{ t["index_export"] }}</a>
+                    <a href="/copy/{{ key.name }}" class="btn btn-secondary">{{ t["index_copy_to_remote"] }}</a>
                     <form method="post" action="/delete" style="display:inline;"
                           onsubmit="return confirm('{{ t["index_delete_confirm"] }}'.replace('{0}', '{{ key.name }}'))">
                         <input type="hidden" name="name" value="{{ key.name }}">

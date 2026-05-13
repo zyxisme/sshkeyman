@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="{{ t["lang"] }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ t["copy_title"] }}</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="header">
+        <h1>{{ t["nav_title"] }}</h1>
+        <nav>
+            <a href="/" class="nav-link active">{{ t["nav_keys"] }}</a>
+            <a href="/config" class="nav-link">{{ t["nav_config"] }}</a>
+            <a href="/config/raw" class="nav-link">{{ t["nav_raw_edit"] }}</a>
+            <a href="/backup" class="nav-link">{{ t["nav_backup_all"] }}</a>
+        </nav>
+    </div>
+
+    <div class="main" style="max-width:600px;margin:0 auto;">
+        <a href="/?selected={{ key_name }}" style="color:#1565c0;text-decoration:none;">{{ t["copy_back"] }}</a>
+
+        {% match flash %}
+        {% when Some with (msg) %}
+        <div class="flash {% if flash_is_error %}flash-error{% else %}flash-success{% endif %}" style="margin-top:12px;">{{ msg }}</div>
+        {% when None %}
+        {% endmatch %}
+
+        <h2 style="margin:16px 0;">{{ t["copy_heading"] }} <span style="color:#1565c0;">{{ key_name }}</span></h2>
+        <p style="color:#666;margin-bottom:20px;">{{ t["copy_description"] }}</p>
+
+        <form method="post" action="/copy">
+            <input type="hidden" name="key_name" value="{{ key_name }}">
+
+            <div class="form-group">
+                <label for="host" class="field-label">{{ t["copy_host_label"] }}</label>
+                <input type="text" id="host" name="host"
+                       placeholder="{{ t["copy_host_placeholder"] }}" required
+                       style="width:100%;padding:8px 12px;border:1px solid #ccc;border-radius:4px;font-size:14px;">
+            </div>
+
+            <div class="form-group">
+                <label for="port" class="field-label">{{ t["copy_port_label"] }}</label>
+                <input type="number" id="port" name="port" value="22" min="1" max="65535"
+                       style="width:120px;padding:8px 12px;border:1px solid #ccc;border-radius:4px;font-size:14px;">
+            </div>
+
+            <div class="form-group">
+                <label for="username" class="field-label">{{ t["copy_username_label"] }}</label>
+                <input type="text" id="username" name="username"
+                       placeholder="{{ t["copy_username_placeholder"] }}" required
+                       style="width:100%;padding:8px 12px;border:1px solid #ccc;border-radius:4px;font-size:14px;">
+            </div>
+
+            <div class="form-group">
+                <span class="field-label" style="display:block;margin-bottom:4px;">{{ t["copy_auth_method_label"] }}</span>
+                <div class="radio-group" style="display:flex;gap:16px;">
+                    <label>
+                        <input type="radio" name="auth_method" value="password" checked onchange="toggleAuthFields()"> {{ t["copy_auth_password"] }}
+                    </label>
+                    <label>
+                        <input type="radio" name="auth_method" value="key" onchange="toggleAuthFields()"> {{ t["copy_auth_key"] }}
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group" id="auth-password">
+                <label for="password" class="field-label">{{ t["copy_password_label"] }}</label>
+                <input type="password" id="password" name="password"
+                       placeholder="{{ t["copy_password_placeholder"] }}"
+                       style="width:100%;padding:8px 12px;border:1px solid #ccc;border-radius:4px;font-size:14px;">
+            </div>
+
+            <div class="form-group" id="auth-key" style="display:none;">
+                <label for="key_path" class="field-label">{{ t["copy_key_path_label"] }}</label>
+                <input type="text" id="key_path" name="key_path"
+                       placeholder="{{ t["copy_key_path_placeholder"] }}"
+                       style="width:100%;padding:8px 12px;border:1px solid #ccc;border-radius:4px;font-size:14px;">
+            </div>
+
+            <div class="form-group" id="auth-passphrase" style="display:none;">
+                <label for="passphrase" class="field-label">{{ t["copy_passphrase_label"] }}</label>
+                <input type="password" id="passphrase" name="passphrase"
+                       placeholder="{{ t["copy_passphrase_placeholder"] }}"
+                       style="width:100%;padding:8px 12px;border:1px solid #ccc;border-radius:4px;font-size:14px;">
+            </div>
+
+            <div class="form-actions" style="margin-top:24px;">
+                <button type="submit" class="btn btn-primary">{{ t["copy_copy_button"] }}</button>
+                <a href="/?selected={{ key_name }}" class="btn btn-secondary">{{ t["copy_cancel"] }}</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function toggleAuthFields() {
+            const method = document.querySelector('input[name="auth_method"]:checked').value;
+            const pwGroup = document.getElementById('auth-password');
+            const pwInput = document.getElementById('password');
+            const keyGroup = document.getElementById('auth-key');
+            const keyInput = document.getElementById('key_path');
+            const ppGroup = document.getElementById('auth-passphrase');
+
+            if (method === 'password') {
+                pwGroup.style.display = '';
+                pwInput.required = true;
+                keyGroup.style.display = 'none';
+                keyInput.required = false;
+                ppGroup.style.display = 'none';
+            } else {
+                pwGroup.style.display = 'none';
+                pwInput.required = false;
+                keyGroup.style.display = '';
+                keyInput.required = true;
+                ppGroup.style.display = '';
+            }
+        }
+    </script>
+</body>
+</html>

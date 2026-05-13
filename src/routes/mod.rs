@@ -1,6 +1,7 @@
 pub mod config;
 pub mod index;
 pub mod keys;
+pub mod remote;
 pub mod transfer;
 
 use axum::Router;
@@ -13,6 +14,9 @@ pub fn router() -> Router {
         .route("/delete", axum::routing::post(keys::delete))
         .route("/export/{name}", axum::routing::get(transfer::export))
         .route("/import", axum::routing::post(transfer::import))
+        // Remote key copy
+        .route("/copy/{name}", axum::routing::get(remote::copy_page))
+        .route("/copy", axum::routing::post(remote::copy_execute))
         // Config management
         .route("/config", axum::routing::get(config::config_page))
         .route("/config/edit", axum::routing::get(config::config_edit))

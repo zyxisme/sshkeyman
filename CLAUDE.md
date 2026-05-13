@@ -25,10 +25,12 @@ cargo fmt --check              # check formatting
 | `ssh.rs` | SSH key filesystem ops: `list_keys()`, `generate_key()`, `delete_key()`, permissions |
 | `config.rs` | SSH config parser/writer: `parse_config()`, `write_config()`, `find_hosts_using_key()`, raw edit |
 | `export.rs` | Key pair export/import + full `~/.ssh/` backup/restore (`backup_all`, `restore_all`) |
+| `remote.rs` | SSH remote ops via `ssh2` crate: `copy_key_to_remote(&RemoteCopyConfig)` — TCP connect, password/pubkey auth, append to remote authorized_keys |
 | `i18n.rs` | Locale detection (`Accept-Language` header), TOML-based translation lookup, flash message resolution |
 | `routes/mod.rs` | Router: all routes + static file serving |
 | `routes/index.rs` | `GET /` — key list + detail + key-host association |
 | `routes/keys.rs` | `POST /generate`, `POST /delete` — key operations |
+| `routes/remote.rs` | `GET /copy/{name}`, `POST /copy` — SSH key copy to remote server |
 | `routes/transfer.rs` | `GET /export/:name`, `POST /import` — single key backup |
 | `routes/config.rs` | Config CRUD, raw editor, backup/restore endpoints |
 
@@ -41,6 +43,8 @@ cargo fmt --check              # check formatting
 | POST | `/delete` | Delete key |
 | GET | `/export/:name` | Download key tar.gz |
 | POST | `/import` | Upload key tar.gz |
+| GET | `/copy/{name}` | Remote copy form |
+| POST | `/copy` | Execute remote key copy |
 | GET | `/config` | Config host list |
 | GET | `/config/edit?host=xxx` | Edit host form |
 | POST | `/config/save` | Save host config |
@@ -57,6 +61,7 @@ cargo fmt --check              # check formatting
 - `templates/config.html` — config host cards, restore form
 - `templates/config_edit.html` — host edit form with dynamic fields (JS)
 - `templates/config_raw.html` — raw config textarea editor
+- `templates/remote_copy.html` — remote server copy form with auth method toggle (JS)
 - `static/style.css` — all styling
 - `locales/zh-CN.toml` — Chinese translations (default language)
 - `locales/en.toml` — English translations (fallback)
@@ -83,10 +88,12 @@ cargo fmt --check              # check formatting
 - Config save uses `RawForm` + manual URL-decode parsing (not `Form<T>`) to handle repeated field names that may arrive as single value or array
 - Backup = tar.gz of keys + config; restore refuses if files exist
 - Default config fields: HostName, User, Port, IdentityFile — always shown in edit form (empty if missing)
+- `ssh2` crate for SSH remote connections — supports password and pubkey auth; needs `libssh2-dev` + `libssl-dev` system packages to build
+- Functions with 8+ params use a config struct (e.g. `RemoteCopyConfig`) to satisfy `clippy::too_many_arguments`
 
 ### Dependencies
 
-`axum` 0.8 (multipart), `tokio` 1, `askama` 0.15, `serde` 1, `serde_json` 1, `tower-http` 0.6, `ssh-key` 0.6, `dirs` 6, `tar` 0.4, `flate2` 1, `clap` 4 (derive), `toml` 0.8, `unic-langid` 0.9
+`axum` 0.8 (multipart), `tokio` 1, `askama` 0.15, `serde` 1, `serde_json` 1, `tower-http` 0.6, `ssh-key` 0.6, `ssh2` 0.9, `dirs` 6, `tar` 0.4, `flate2` 1, `clap` 4 (derive), `toml` 0.8, `unic-langid` 0.9
 
 ## Packaging & CI
 
