@@ -1,3 +1,4 @@
+use crate::assets::LocaleAssets;
 use std::collections::HashMap;
 use std::sync::LazyLock;
 
@@ -7,15 +8,23 @@ static EN: LazyLock<LocaleMap> = LazyLock::new(|| load_locale("en"));
 static ZH_CN: LazyLock<LocaleMap> = LazyLock::new(|| load_locale("zh-CN"));
 
 fn load_locale(name: &str) -> LocaleMap {
-    let content = match std::fs::read_to_string(format!("locales/{}.toml", name)) {
-        Ok(c) => c,
+    let path = format!("{}.toml", name);
+    let file = match LocaleAssets::get(&path) {
+        Some(f) => f,
+        None => {
+            eprintln!("i18n: locale file {} not found in embedded assets", path);
+            return HashMap::new();
+        }
+    };
+    let content = match std::str::from_utf8(&file.data) {
+        Ok(s) => s,
         Err(e) => {
-            eprintln!("i18n: failed to read locales/{}.toml: {}", name, e);
+            eprintln!("i18n: invalid UTF-8 in locale {}: {}", path, e);
             return HashMap::new();
         }
     };
 
-    let toml: toml::Table = match toml::from_str(&content) {
+    let toml: toml::Table = match toml::from_str(content) {
         Ok(t) => t,
         Err(e) => {
             eprintln!("i18n: failed to parse locales/{}.toml: {}", name, e);

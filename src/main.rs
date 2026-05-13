@@ -1,3 +1,4 @@
+mod assets;
 mod config;
 mod export;
 mod i18n;

@@ -4,8 +4,21 @@ pub mod keys;
 pub mod remote;
 pub mod transfer;
 
+use crate::assets::StaticAssets;
 use axum::Router;
-use tower_http::services::ServeDir;
+use axum::extract::Path;
+use axum::http::{StatusCode, header};
+use axum::response::IntoResponse;
+
+async fn static_handler(Path(path): Path<String>) -> impl IntoResponse {
+    match StaticAssets::get(&path) {
+        Some(file) => {
+            let mime = mime_guess::from_path(&path).first_or_octet_stream();
+            ([(header::CONTENT_TYPE, mime.as_ref())], file.data).into_response()
+        }
+        None => StatusCode::NOT_FOUND.into_response(),
+    }
+}
 
 pub fn router() -> Router {
     Router::new()
@@ -32,5 +45,5 @@ pub fn router() -> Router {
         .route("/backup", axum::routing::get(config::backup))
         .route("/restore", axum::routing::post(config::restore))
         // Static files
-        .nest_service("/static", ServeDir::new("static"))
+        .route("/static/{*path}", axum::routing::get(static_handler))
 }
